@@ -1,0 +1,59 @@
+{
+  "name": "rls-guard",
+  "version": "0.0.1",
+  "description": "A CLI tool for managing PostgreSQL Row Level Security (RLS) policies as code",
+  "main": "index.js",
+  "type": "module",
+  "bin": {
+    "rls-guard": "./bin/cli.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "cli",
+    "postgresql",
+    "rls", 
+    "row-level-security",
+    "database",
+    "security",
+    "policies",
+    "golang",
+    "typescript"
+  ],
+  "author": "Theodore Han <theodore@example.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/theodorehan/rls-guard.git"
+  },
+  "homepage": "https://github.com/theodorehan/rls-guard#readme",
+  "engines": {
+    "node": ">=12.0.0"
+  },
+  "os": [
+    "darwin",
+    "linux",
+    "win32"
+  ],
+  "cpu": [
+    "x64",
+    "arm64"
+  ],
+  "files": [
+    "bin/",
+    "src/",
+    "lib/",
+    "README.md"
+  ],
+  "dependencies": {
+    "commander": "^12.0.0",
+    "pg": "^8.11.0",
+    "tsx": "^4.7.0",
+    "@types/node": "^20.0.0",
+    "chalk": "^5.3.0"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.11.0"
+  }
+}
