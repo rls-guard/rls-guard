@@ -1,8 +1,7 @@
 import { Command } from 'commander';
-import { resolve } from 'path';
-import { pathToFileURL } from 'url';
 import chalk from 'chalk';
 import { DatabaseManager } from '../lib/database.js';
+import { loadConfig } from '../lib/config.js';
 
 const deployCommand = new Command('deploy');
 
@@ -54,65 +53,23 @@ deployCommand
       }
       
     } catch (error) {
-      console.error(chalk.red('❌') + ' Deployment failed:', error.message);
+      if (error instanceof Error) {
+        console.error(chalk.red('❌') + ' Deployment failed:', error.message);
+      } else {
+        console.error(chalk.red('❌') + ' Deployment failed:', error);
+      }
       process.exit(1);
     }
   });
 
-async function loadConfig(configPath) {
-  const absolutePath = resolve(configPath);
-  
-  try {
-    // Use tsx to run the TypeScript file directly
-    const { spawn } = await import('child_process');
-    const { promisify } = await import('util');
-    const execAsync = promisify(spawn);
-    
-    // Execute tsx to load and export the config
-    const process = spawn('npx', ['tsx', '--eval', `
-      import configBuilder from '${absolutePath}';
-      console.log(JSON.stringify(configBuilder.build(), null, 2));
-    `], { stdio: ['pipe', 'pipe', 'pipe'] });
-    
-    let stdout = '';
-    let stderr = '';
-    
-    process.stdout.on('data', (data) => {
-      stdout += data.toString();
-    });
-    
-    process.stderr.on('data', (data) => {
-      stderr += data.toString();
-    });
-    
-    return new Promise((resolve, reject) => {
-      process.on('close', (code) => {
-        if (code === 0) {
-          try {
-            const config = JSON.parse(stdout.trim());
-            resolve(config);
-          } catch (e) {
-            reject(new Error(`Failed to parse configuration JSON: ${e.message}`));
-          }
-        } else {
-          reject(new Error(`Failed to load configuration: ${stderr || 'Unknown error'}`));
-        }
-      });
-    });
-    
-  } catch (error) {
-    throw new Error(`Failed to load configuration: ${error.message}`);
-  }
-}
-
-function maskConnectionString(connStr) {
+function maskConnectionString(connStr: string): string {
   if (connStr.length > 50) {
     return connStr.slice(0, 20) + '...' + connStr.slice(-15);
   }
   return '***';
 }
 
-function buildConnectionString(dbConfig) {
+function buildConnectionString(dbConfig: any): string {
   if (dbConfig.url) return dbConfig.url;
   
   const { host = 'localhost', port = 5432, database, username, password, ssl } = dbConfig;
@@ -125,7 +82,7 @@ function buildConnectionString(dbConfig) {
   return connStr;
 }
 
-async function validateTables(dbManager, policies) {
+async function validateTables(dbManager: DatabaseManager, policies: any[]) {
   const tables = [...new Set(policies.map(p => p.table))];
   
   for (const table of tables) {
@@ -135,14 +92,14 @@ async function validateTables(dbManager, policies) {
         console.log(chalk.yellow('⚠️ ') + ` Warning: Table '${table}' does not exist`);
       }
     } catch (error) {
-      console.log(chalk.yellow('⚠️ ') + ` Warning: Could not verify table '${table}': ${error.message}`);
+      console.log(chalk.yellow('⚠️ ') + ` Warning: Could not verify table '${table}': ${error instanceof Error ? error.message : error}`);
     }
   }
 }
 
-async function deployPolicies(dbManager, policies, dryRun) {
+async function deployPolicies(dbManager: DatabaseManager, policies: any[], dryRun: boolean) {
   // Group policies by table
-  const policiesByTable = {};
+  const policiesByTable: { [key: string]: any[] } = {};
   for (const policy of policies) {
     if (!policiesByTable[policy.table]) {
       policiesByTable[policy.table] = [];
@@ -176,7 +133,7 @@ async function deployPolicies(dbManager, policies, dryRun) {
   }
 }
 
-function generateCreatePolicySQL(policy) {
+function generateCreatePolicySQL(policy: any): string {
   let sql = `CREATE POLICY ${policy.name} ON ${policy.table}`;
   
   // Add policy type (restrictive/permissive) - must come before FOR clause
@@ -200,7 +157,7 @@ function generateCreatePolicySQL(policy) {
   return sql + ';';
 }
 
-function getUniqueTableCount(policies) {
+function getUniqueTableCount(policies: any[]): number {
   return new Set(policies.map(p => p.table)).size;
 }
 

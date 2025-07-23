@@ -1,3 +1,5 @@
+// Rename this file to pull.test.ts and add TypeScript type annotations.
+
 // Unit tests for pull command
 import { test, describe, beforeEach, afterEach } from 'node:test';
 import assert from 'node:assert';

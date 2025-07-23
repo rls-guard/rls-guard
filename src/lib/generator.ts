@@ -2,7 +2,19 @@
 import { parseExpression, generateHelperCall, analyzeExpression } from './expression-parser.js';
 
 export class ConfigGenerator {
-  constructor(options = {}) {
+  options: {
+    format: string;
+    addComments: boolean;
+    maskConnection: boolean;
+    connectionString?: string;
+  };
+
+  constructor(options: {
+    format?: string;
+    addComments?: boolean;
+    maskConnection?: boolean;
+    connectionString?: string;
+  } = {}) {
     this.options = {
       format: options.format || 'typescript',
       addComments: options.addComments || false,
@@ -17,7 +29,7 @@ export class ConfigGenerator {
    * @param {Array} policies - Array of policy objects from introspector
    * @returns {string} Generated configuration content
    */
-  generateConfig(policies) {
+  generateConfig(policies: any[]): string {
     if (this.options.format === 'json') {
       return this.generateJsonConfig(policies);
     }
@@ -30,7 +42,7 @@ export class ConfigGenerator {
    * @param {Array} policies - Array of policy objects
    * @returns {string} TypeScript configuration content
    */
-  generateTypeScriptConfig(policies) {
+  generateTypeScriptConfig(policies: any[]): string {
     const imports = this.generateImports();
     const header = this.generateHeader();
     const databaseConfig = this.generateDatabaseConfig();
@@ -47,7 +59,7 @@ export class ConfigGenerator {
    * @param {Array} policies - Array of policy objects
    * @returns {string} JSON configuration content
    */
-  generateJsonConfig(policies) {
+  generateJsonConfig(policies: any[]): string {
     const config = {
       database: this.extractDatabaseConfig(),
       policies: policies.map(policy => ({
@@ -68,15 +80,16 @@ export class ConfigGenerator {
    * Generate import statements for TypeScript config
    * @returns {string} Import statements
    */
-  generateImports() {
-    return `import { config, currentUserId, tenantId, publicAccess, noAccess, recentData, ownerOnly, roleCheck, timeWindow } from './lib/rls-config.js';`;
+  generateImports(): string {
+    return `import { RLSConfig } from 'rls-guard';
+const { config, currentUserId, tenantId, publicAccess, noAccess, recentData, ownerOnly, roleCheck, timeWindow } = RLSConfig;`;
   }
 
   /**
    * Generate header comment
    * @returns {string} Header comment
    */
-  generateHeader() {
+  generateHeader(): string {
     if (!this.options.addComments) return '';
     
     return `// RLS Guard Configuration
@@ -90,7 +103,7 @@ export class ConfigGenerator {
    * Generate database configuration section
    * @returns {string} Database configuration
    */
-  generateDatabaseConfig() {
+  generateDatabaseConfig(): string {
     const connectionConfig = this.generateConnectionConfig();
     
     return `const rlsConfig = config()
@@ -102,7 +115,7 @@ export class ConfigGenerator {
    * Generate connection configuration
    * @returns {string} Connection configuration
    */
-  generateConnectionConfig() {
+  generateConnectionConfig(): string {
     if (!this.options.connectionString) {
       return `
     .connectionUrl(process.env.DATABASE_URL || "postgresql://user:pass@localhost:5432/mydb")`;
@@ -121,13 +134,13 @@ export class ConfigGenerator {
    * @param {Array} policies - Array of policy objects
    * @returns {string} Policy configurations
    */
-  generatePolicyConfigs(policies) {
+  generatePolicyConfigs(policies: any[]): string {
     if (policies.length === 0) {
       return '  // No policies found in database';
     }
 
     const policyGroups = this.groupPoliciesByTable(policies);
-    const sections = [];
+    const sections: string[] = [];
 
     for (const [tableName, tablePolicies] of Object.entries(policyGroups)) {
       const tableComment = this.options.addComments 
@@ -149,7 +162,7 @@ export class ConfigGenerator {
    * @param {Object} policy - Policy object
    * @returns {string} Single policy configuration
    */
-  generateSinglePolicy(policy) {
+  generateSinglePolicy(policy: any): string {
     const parsed = parseExpression(policy.expression);
     const helperCall = generateHelperCall(parsed);
     const analysis = analyzeExpression(parsed);
@@ -186,8 +199,8 @@ export class ConfigGenerator {
    * @param {Object} analysis - Expression analysis
    * @returns {string} Policy comments
    */
-  generatePolicyComments(policy, parsed, analysis) {
-    const lines = [];
+  generatePolicyComments(policy: any, parsed: any, analysis: any): string {
+    const lines: string[] = [];
     
     lines.push(`  // Policy: ${policy.name}`);
     
@@ -216,7 +229,7 @@ export class ConfigGenerator {
    * @param {Array} roles - Array of role names
    * @returns {string} Formatted roles
    */
-  formatRoles(roles) {
+  formatRoles(roles: string[]): string {
     if (!roles || roles.length === 0) {
       return '"public"';
     }
@@ -233,8 +246,8 @@ export class ConfigGenerator {
    * @param {Array} policies - Array of policy objects
    * @returns {Object} Policies grouped by table
    */
-  groupPoliciesByTable(policies) {
-    const groups = {};
+  groupPoliciesByTable(policies: any[]): { [key: string]: any[] } {
+    const groups: { [key: string]: any[] } = {};
     
     policies.forEach(policy => {
       if (!groups[policy.table]) {
@@ -255,7 +268,7 @@ export class ConfigGenerator {
    * Generate footer of the configuration file
    * @returns {string} Footer content
    */
-  generateFooter() {
+  generateFooter(): string {
     return `
 export default rlsConfig;`;
   }
@@ -264,7 +277,7 @@ export default rlsConfig;`;
    * Extract database configuration from connection string
    * @returns {Object} Database configuration object
    */
-  extractDatabaseConfig() {
+  extractDatabaseConfig(): { url: string } {
     if (!this.options.connectionString) {
       return { url: "postgresql://user:pass@localhost:5432/mydb" };
     }
@@ -281,7 +294,7 @@ export default rlsConfig;`;
    * @param {string} connectionString - Original connection string
    * @returns {string} Masked connection string
    */
-  maskConnectionString(connectionString) {
+  maskConnectionString(connectionString: string): string {
     return connectionString.replace(
       /postgresql:\/\/([^:]+):([^@]+)@/,
       'postgresql://$1:***@'

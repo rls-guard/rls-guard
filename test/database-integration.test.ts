@@ -1,3 +1,5 @@
+// Rename this file to database-integration.test.ts and add TypeScript type annotations.
+
 // Full database integration tests with in-memory PostgreSQL
 import { test, describe, before, after, beforeEach, afterEach } from 'node:test';
 import assert from 'node:assert';
@@ -9,10 +11,10 @@ import { Client } from 'pg';
 
 // Simple in-memory PostgreSQL setup using Docker or embedded PostgreSQL
 describe('Database Integration Tests', () => {
-  let dbConnectionString;
-  let testClient;
-  let testDir;
-  let originalCwd;
+  let dbConnectionString: string;
+  let testClient: Client | null;
+  let testDir: { name: string; removeCallback: () => void };
+  let originalCwd: string;
 
   before(async () => {
     // Create temporary directory for test files
@@ -241,7 +243,7 @@ describe('Database Integration Tests', () => {
     assert.ok(config.policies.length >= 5, 'Should have at least 5 policies');
     
     // Check policy structure
-    const userPolicy = config.policies.find(p => p.name === 'user_isolation');
+    const userPolicy = config.policies.find((p: any) => p.name === 'user_isolation');
     assert.ok(userPolicy, 'Should find user_isolation policy');
     assert.strictEqual(userPolicy.table, 'users');
     assert.strictEqual(userPolicy.command, 'SELECT');

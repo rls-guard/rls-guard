@@ -1,3 +1,5 @@
+// Rename this file to deploy.test.ts and add TypeScript type annotations.
+
 // Unit tests for deploy command
 import { test, describe, beforeEach, afterEach, mock } from 'node:test';
 import assert from 'node:assert';

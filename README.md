@@ -129,6 +129,29 @@ Or individual parameters:
 ### `rls-guard init`
 Create a new `rls.config.ts` file with example policies.
 
+### `rls-guard pull [options]`
+Extract existing RLS policies from your PostgreSQL database and generate a configuration file.
+
+**Options:**
+- `--connection <url>` - Database connection string (or set DATABASE_URL env var)
+- `--output, -o <file>` - Output file path (default: `rls.config.ts`)
+- `--tables, -t <tables>` - Comma-separated list of tables to extract
+- `--format, -f <format>` - Output format: `typescript` or `json` (default: `typescript`)
+- `--comments, -c` - Add explanatory comments to generated config
+- `--no-mask` - Don't mask sensitive connection info in output
+
+**Example:**
+```bash
+# Extract all policies to TypeScript config
+rls-guard pull --connection "postgresql://user:pass@localhost:5432/mydb"
+
+# Extract specific tables with comments
+rls-guard pull --tables "users,posts" --comments --output policies.config.ts
+
+# Generate JSON format
+rls-guard pull --format json --output policies.json
+```
+
 ### `rls-guard deploy [options]`
 Deploy RLS policies to your PostgreSQL database.
 

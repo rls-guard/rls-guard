@@ -6,7 +6,7 @@
  * @param {string} expression - SQL expression from RLS policy
  * @returns {Object} Parsed expression with helper function mapping
  */
-export function parseExpression(expression) {
+export function parseExpression(expression: string): { helper: string, raw: string, confidence: number, params?: any } {
   if (!expression || expression.trim() === '') {
     return { helper: 'publicAccess', raw: expression, confidence: 1.0 };
   }
@@ -28,37 +28,37 @@ export function parseExpression(expression) {
       name: 'currentUserId',
       regex: /\(?(\w+)\s*=\s*\(?current_setting\('app\.current_user_id'(?:::text)?\)(?:::uuid)?\)?/i,
       confidence: 0.9,
-      extract: (match) => ({ column: match[1] })
+      extract: (match: RegExpMatchArray) => ({ column: match[1] })
     },
     {
       name: 'tenantId', 
       regex: /(\w+)\s*=\s*current_setting\('app\.tenant_id'\)::uuid/i,
       confidence: 0.9,
-      extract: (match) => ({ column: match[1] })
+      extract: (match: RegExpMatchArray) => ({ column: match[1] })
     },
     {
       name: 'roleCheck',
       regex: /current_setting\('app\.user_role'\)\s*=\s*'([^']+)'/i,
       confidence: 0.9,
-      extract: (match) => ({ role: match[1] })
+      extract: (match: RegExpMatchArray) => ({ role: match[1] })
     },
     {
       name: 'recentData',
       regex: /\(?(\w+)\s*>=\s*\(?(?:current_date|CURRENT_DATE)\s*-\s*(?:'(\d+)\s*days?'::interval|interval\s*'(\d+)\s*days?')\)?/i,
       confidence: 0.8,
-      extract: (match) => ({ column: match[1], days: parseInt(match[2] || match[3]) })
+      extract: (match: RegExpMatchArray) => ({ column: match[1], days: parseInt(match[2] || match[3]) })
     },
     {
       name: 'timeWindow',
       regex: /(\w+)\s*>=\s*now\(\)\s*-\s*interval\s*'(\d+)\s*hours?'/i,
       confidence: 0.8,
-      extract: (match) => ({ column: match[1], hours: parseInt(match[2]) })
+      extract: (match: RegExpMatchArray) => ({ column: match[1], hours: parseInt(match[2]) })
     },
     {
       name: 'ownerOnly',
       regex: /(\w+)\s*=\s*(\w+)/i,
       confidence: 0.6,
-      extract: (match) => ({ userColumn: match[1], ownerColumn: match[2] })
+      extract: (match: RegExpMatchArray) => ({ userColumn: match[1], ownerColumn: match[2] })
     }
   ];
 
@@ -84,8 +84,7 @@ export function parseExpression(expression) {
   return {
     helper: 'custom',
     raw: expression,
-    confidence: 0.0,
-    reason: 'No matching helper pattern found'
+    confidence: 0.0
   };
 }
 
@@ -94,7 +93,7 @@ export function parseExpression(expression) {
  * @param {string} expression - Complex SQL expression
  * @returns {Object} Parsed complex expression
  */
-function parseComplexExpression(expression) {
+function parseComplexExpression(expression: string): { helper: string, conditions?: any[], raw: string, confidence: number } {
   // For now, treat complex expressions as custom
   // Future enhancement: recursively parse sub-expressions
   const conditions = [];
@@ -122,8 +121,7 @@ function parseComplexExpression(expression) {
   return {
     helper: 'custom',
     raw: expression,
-    confidence: 0.0,
-    reason: 'Complex expression could not be parsed'
+    confidence: 0.0
   };
 }
 
@@ -132,7 +130,7 @@ function parseComplexExpression(expression) {
  * @param {Object} parsed - Parsed expression object
  * @returns {string} Helper function call as string
  */
-export function generateHelperCall(parsed) {
+export function generateHelperCall(parsed: { helper: string, params?: any, raw: string }): string {
   if (!parsed || parsed.helper === 'custom') {
     return `"${parsed.raw}"`;
   }
@@ -171,7 +169,7 @@ export function generateHelperCall(parsed) {
         : `ownerOnly("${parsed.params.userColumn}", "${parsed.params.ownerColumn}")`;
         
     case 'complex':
-      const conditions = parsed.conditions.map(c => generateHelperCall(c)).join(', ');
+      const conditions = (parsed as any).conditions?.map((c: any) => generateHelperCall(c)).join(', ');
       return `/* Complex: ${parsed.raw} */ "${parsed.raw}"`;
       
     default:
@@ -184,7 +182,7 @@ export function generateHelperCall(parsed) {
  * @param {Object} parsed - Parsed expression object  
  * @returns {Object} Analysis with suggestions
  */
-export function analyzeExpression(parsed) {
+export function analyzeExpression(parsed: { confidence: number, helper: string }): { confidence: number, suggestions: string[], warnings: string[] } {
   const analysis = {
     confidence: parsed.confidence,
     suggestions: [],
@@ -192,18 +190,18 @@ export function analyzeExpression(parsed) {
   };
 
   if (parsed.confidence < 0.5) {
-    analysis.warnings.push('Low confidence in helper function mapping');
-    analysis.suggestions.push('Consider using a custom expression or updating helper patterns');
+    analysis.warnings.push('Low confidence in helper function mapping' as never);
+    analysis.suggestions.push('Consider using a custom expression or updating helper patterns' as never);
   }
 
   if (parsed.helper === 'custom') {
-    analysis.suggestions.push('Expression could not be mapped to helper function');
-    analysis.suggestions.push('Review if this pattern should be added to available helpers');
+    analysis.suggestions.push('Expression could not be mapped to helper function' as never);
+    analysis.suggestions.push('Review if this pattern should be added to available helpers' as never);
   }
 
   if (parsed.helper === 'ownerOnly' && parsed.confidence < 0.8) {
-    analysis.warnings.push('Simple column comparison detected - verify this is actually owner-based access');
-    analysis.suggestions.push('Consider if this should use currentUserId() instead');
+    analysis.warnings.push('Simple column comparison detected - verify this is actually owner-based access' as never);
+    analysis.suggestions.push('Consider if this should use currentUserId() instead' as never);
   }
 
   return analysis;

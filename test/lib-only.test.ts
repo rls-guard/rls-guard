@@ -1,3 +1,5 @@
+// Rename this file to lib-only.test.ts and add TypeScript type annotations.
+
 // Unit tests for library components only (no CLI execution)
 import { test, describe, beforeEach } from 'node:test';
 import assert from 'node:assert';
@@ -6,13 +8,13 @@ import { parseExpression, generateHelperCall, analyzeExpression } from '../src/l
 import { ConfigGenerator } from '../src/lib/generator.js';
 
 describe('PolicyIntrospector', () => {
-  let introspector;
-  let mockDbManager;
+  let introspector: PolicyIntrospector;
+  let mockDbManager: any;
 
   beforeEach(() => {
     mockDbManager = {
       client: {
-        query: async (sql, params) => {
+        query: async (sql: string, params: any) => {
           if (sql.includes('pg_policies')) {
             return {
               rows: [
@@ -106,7 +108,7 @@ describe('Expression Parser', () => {
 });
 
 describe('ConfigGenerator', () => {
-  let generator;
+  let generator: ConfigGenerator;
   const samplePolicies = [
     {
       name: 'user_isolation',

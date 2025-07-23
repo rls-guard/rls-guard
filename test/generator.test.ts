@@ -4,7 +4,7 @@ import assert from 'node:assert';
 import { ConfigGenerator } from '../src/lib/generator.js';
 
 describe('ConfigGenerator', () => {
-  let generator;
+  let generator: ConfigGenerator;
   const samplePolicies = [
     {
       name: 'user_isolation',

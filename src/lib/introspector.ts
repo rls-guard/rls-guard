@@ -1,8 +1,59 @@
 // PolicyIntrospector - Extract RLS policies from PostgreSQL database
 import { parseExpression } from './expression-parser.js';
+import { Client } from 'pg';
+
+interface PolicyRow {
+  schemaname: string;
+  tablename: string;
+  policyname: string;
+  permissive: 'PERMISSIVE' | 'RESTRICTIVE';
+  roles: string;
+  cmd: string;
+  qual: string;
+  with_check: string;
+  qual_expression?: string;
+  with_check_expression?: string;
+  table_oid: number;
+}
+
+interface TransformedPolicy {
+  name: string;
+  table: string;
+  schema: string;
+  command: string;
+  roles: string[];
+  permissive: boolean;
+  expression: string;
+  withCheck: string;
+  raw: {
+    qual: string;
+    with_check: string;
+    table_oid: number;
+  };
+}
+
+interface TableInfo {
+  schema: string;
+  columns: ColumnInfo[];
+}
+
+interface ColumnInfo {
+  name: string;
+  type: string;
+  nullable: boolean;
+  default: string;
+}
+
+interface RlsStatus {
+  enabled: boolean;
+  forced: boolean;
+  schema: string;
+}
 
 export class PolicyIntrospector {
-  constructor(dbManager) {
+  db: { client: Client };
+
+  constructor(dbManager: { client: Client }) {
     this.db = dbManager;
   }
 
@@ -11,7 +62,7 @@ export class PolicyIntrospector {
    * @param {string[]|null} tableFilter - Optional list of tables to filter by
    * @returns {Promise<Array>} Array of policy objects
    */
-  async extractPolicies(tableFilter = null) {
+  async extractPolicies(tableFilter: string[] | null = null): Promise<TransformedPolicy[]> {
     const query = `
       SELECT 
         pol.schemaname,
@@ -44,8 +95,8 @@ export class PolicyIntrospector {
    * @param {Object} row - Raw policy row from pg_policies
    * @returns {Object} Transformed policy object
    */
-  transformPolicyRow(row) {
-    const policy = {
+  transformPolicyRow(row: PolicyRow): TransformedPolicy {
+    const policy: TransformedPolicy = {
       name: row.policyname,
       table: row.tablename,
       schema: row.schemaname,
@@ -53,7 +104,7 @@ export class PolicyIntrospector {
       roles: this.parseRoles(row.roles),
       permissive: row.permissive === 'PERMISSIVE',
       expression: row.qual_expression || 'true',
-      withCheck: row.with_check_expression,
+      withCheck: row.with_check_expression || '',
       raw: {
         qual: row.qual,
         with_check: row.with_check,
@@ -69,8 +120,8 @@ export class PolicyIntrospector {
    * @param {string} cmd - PostgreSQL command (SELECT, INSERT, etc.)
    * @returns {string} Normalized command name
    */
-  normalizeCommand(cmd) {
-    const commandMap = {
+  normalizeCommand(cmd: string): string {
+    const commandMap: { [key: string]: string } = {
       'r': 'SELECT',
       'a': 'INSERT', 
       'w': 'UPDATE',
@@ -86,7 +137,7 @@ export class PolicyIntrospector {
    * @param {string} rolesString - PostgreSQL roles array string like {user,admin}
    * @returns {string[]} Array of role names
    */
-  parseRoles(rolesString) {
+  parseRoles(rolesString: string): string[] {
     if (!rolesString) return [];
     
     // Remove curly braces and split by comma
@@ -102,7 +153,7 @@ export class PolicyIntrospector {
    * @param {string[]} tableNames - List of table names
    * @returns {Promise<Object>} Table metadata
    */
-  async getTableInfo(tableNames) {
+  async getTableInfo(tableNames: string[]): Promise<{ [key: string]: TableInfo }> {
     if (!tableNames || tableNames.length === 0) return {};
 
     const query = `
@@ -122,7 +173,7 @@ export class PolicyIntrospector {
     `;
 
     const result = await this.db.client.query(query, [tableNames]);
-    const tables = {};
+    const tables: { [key: string]: TableInfo } = {};
 
     result.rows.forEach(row => {
       if (!tables[row.table_name]) {
@@ -150,7 +201,7 @@ export class PolicyIntrospector {
    * @param {string[]} tableNames - List of table names to check
    * @returns {Promise<Object>} Map of table name to RLS status
    */
-  async getRlsStatus(tableNames) {
+  async getRlsStatus(tableNames: string[]): Promise<{ [key: string]: RlsStatus }> {
     if (!tableNames || tableNames.length === 0) return {};
 
     const query = `
@@ -167,7 +218,7 @@ export class PolicyIntrospector {
     `;
 
     const result = await this.db.client.query(query, [tableNames]);
-    const status = {};
+    const status: { [key: string]: RlsStatus } = {};
 
     result.rows.forEach(row => {
       status[row.table_name] = {

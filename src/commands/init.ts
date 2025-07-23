@@ -1,3 +1,5 @@
+// Rename this file to init.ts and add TypeScript type annotations.
+
 import { Command } from 'commander';
 import { writeFileSync } from 'fs';
 import { resolve } from 'path';
@@ -13,17 +15,8 @@ initCommand
     
     const configTemplate = `// rls-guard configuration file
 // Define your PostgreSQL connection and RLS policies
-
-import { 
-  config, 
-  currentUserId, 
-  tenantId, 
-  recentData,
-  publicAccess,
-  noAccess,
-  ownerOnly,
-  roleCheck 
-} from './lib/rls-config.js';
+import { RLSConfig } from 'rls-guard';
+const { config, currentUserId, tenantId, publicAccess, noAccess, recentData, ownerOnly, roleCheck, timeWindow } = RLSConfig;
 
 // Build your RLS configuration using the fluent API
 const configBuilder = config()
@@ -127,7 +120,7 @@ export default configBuilder;
       console.log('2. Define your RLS policies');
       console.log('3. Run ' + chalk.cyan("'rls-guard deploy'") + ' to apply the policies');
     } catch (error) {
-      console.error(chalk.red('❌') + ` Failed to create ${options.output}:`, error.message);
+      console.error(chalk.red('❌') + ` Failed to create ${options.output}:`, error instanceof Error ? error.message : error);
       process.exit(1);
     }
   });

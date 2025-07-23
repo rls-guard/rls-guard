@@ -3,15 +3,26 @@
 import { Command } from 'commander';
 import chalk from 'chalk';
 import { createRequire } from 'module';
+import path, { dirname } from 'path';
+import { fileURLToPath } from 'url';
 
-const require = createRequire(import.meta.url);
+const customRequire = createRequire(import.meta.url);
 
-// Import commands
-import { initCommand } from '../dist/commands/init.js';
-import { deployCommand } from '../dist/commands/deploy.js';
-import { pullCommand } from '../dist/commands/pull.js';
+// Replace __dirname with ES module equivalent
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
-const packageJson = require('../package.json');
+// Dynamically resolve commands path
+const commandsPath = path.resolve(__dirname, '../commands');
+
+// Replace dynamic `require` with `import()`
+const initCommand = (await import(path.join(commandsPath, 'init.js'))).initCommand;
+const deployCommand = (await import(path.join(commandsPath, 'deploy.js'))).deployCommand;
+const pullCommand = (await import(path.join(commandsPath, 'pull.js'))).pullCommand;
+
+// Update the `packageJson` path to resolve correctly
+const packageJsonPath = path.resolve(__dirname, '../../package.json');
+const packageJson = customRequire(packageJsonPath);
 
 const program = new Command();
 
