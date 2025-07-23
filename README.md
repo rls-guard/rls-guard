@@ -145,6 +145,26 @@ Show the current version.
 - PostgreSQL 9.5+ (RLS support)
 - TypeScript configuration file
 
+## Testing
+
+RLS Guard includes comprehensive test suites:
+
+```bash
+# Run unit and basic integration tests
+npm test
+
+# Run database integration tests (requires PostgreSQL)
+npm run test:db
+
+# Set up test database with Docker
+npm run test:db-setup
+
+# Run full test suite with Docker database  
+npm run test:full
+```
+
+See [TESTING.md](TESTING.md) for detailed testing documentation.
+
 ## Contributing
 
 We welcome contributions! RLS Guard is an open-source project that benefits from community involvement.

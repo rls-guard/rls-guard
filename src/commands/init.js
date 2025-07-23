@@ -7,8 +7,9 @@ const initCommand = new Command('init');
 
 initCommand
   .description('Create a new rls.config.ts file with example policies')
-  .action(() => {
-    const configPath = resolve('rls.config.ts');
+  .option('-o, --output <file>', 'Output file path', 'rls.config.ts')
+  .action((options) => {
+    const configPath = resolve(options.output);
     
     const configTemplate = `// rls-guard configuration file
 // Define your PostgreSQL connection and RLS policies
@@ -22,7 +23,7 @@ import {
   noAccess,
   ownerOnly,
   roleCheck 
-} from 'rls-guard/lib/rls-config';
+} from './lib/rls-config.js';
 
 // Build your RLS configuration using the fluent API
 const configBuilder = config()
@@ -119,14 +120,14 @@ export default configBuilder;
 
     try {
       writeFileSync(configPath, configTemplate);
-      console.log(chalk.green('✅') + ' Created rls.config.ts');
+      console.log(chalk.green('✅') + ` Created ${options.output}`);
       console.log('');
       console.log('Next steps:');
       console.log('1. Update the database connection URL');
       console.log('2. Define your RLS policies');
       console.log('3. Run ' + chalk.cyan("'rls-guard deploy'") + ' to apply the policies');
     } catch (error) {
-      console.error(chalk.red('❌') + ' Failed to create rls.config.ts:', error.message);
+      console.error(chalk.red('❌') + ` Failed to create ${options.output}:`, error.message);
       process.exit(1);
     }
   });

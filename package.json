@@ -8,7 +8,13 @@
     "rls-guard": "./bin/cli.js"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node --test test/lib-only.test.js test/integration.test.js",
+    "test:watch": "node --test --watch test/lib-only.test.js test/integration.test.js",
+    "test:all": "node --test test/*.test.js",
+    "test:db": "node --test test/database-integration.test.js",
+    "test:db-setup": "./scripts/setup-test-db.sh",
+    "test:db-teardown": "./scripts/teardown-test-db.sh",
+    "test:full": "npm run test:db-setup && npm run test:db && npm run test:db-teardown"
   },
   "keywords": [
     "cli",

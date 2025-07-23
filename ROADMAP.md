@@ -47,11 +47,24 @@ testPolicies({
 ```
 
 ### Database Features
+- [ ] **Policy introspection** - `rls-guard pull` command to extract existing policies from database
 - [ ] **Connection testing** - `rls-guard connect` command to verify database connectivity
 - [ ] **Policy diff** - Show what policies will change before deployment
 - [ ] **Rollback support** - Ability to undo the last deployment
 - [ ] **Multiple database support** - Deploy to staging/production environments
 - [ ] **Transaction safety** - Wrap all changes in database transactions
+
+**Example pull workflow:**
+```bash
+# Extract all RLS policies from database
+rls-guard pull --output rls.config.ts
+
+# Pull only specific tables
+rls-guard pull --tables users,orders --output policies.ts
+
+# Generate TypeScript with comments
+rls-guard pull --format typescript --comments
+```
 
 ## 🚀 Version 0.2.0 - Advanced Features
 
