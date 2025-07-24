@@ -31,9 +31,9 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/theodorehan/rls-guard.git"
+    "url": "git+https://github.com/rls-guard/rls-guard.git"
   },
-  "homepage": "https://github.com/theodorehan/rls-guard#readme",
+  "homepage": "https://github.com/rls-guard/rls-guard#readme",
   "engines": {
     "node": ">=12.0.0"
   },
