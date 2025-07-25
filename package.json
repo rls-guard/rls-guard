@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "type": "module",
   "bin": {
-    "rls-guard": "tsx ./bin/cli.ts"
+    "rls-guard": "./dist/bin/cli.js"
   },
   "scripts": {
     "build": "tsc",

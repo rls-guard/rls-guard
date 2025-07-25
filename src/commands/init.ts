@@ -15,8 +15,7 @@ initCommand
     
     const configTemplate = `// rls-guard configuration file
 // Define your PostgreSQL connection and RLS policies
-import { RLSConfig } from 'rls-guard';
-const { config, currentUserId, tenantId, publicAccess, noAccess, recentData, ownerOnly, roleCheck, timeWindow } = RLSConfig;
+import { config, currentUserId, tenantId, publicAccess, noAccess, recentData, ownerOnly, roleCheck, timeWindow } from 'rls-guard';
 
 // Build your RLS configuration using the fluent API
 const configBuilder = config()

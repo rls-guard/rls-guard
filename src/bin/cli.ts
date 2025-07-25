@@ -1,4 +1,4 @@
-#!/usr/bin/env tsx
+#!/usr/bin/env node
 
 import { Command } from 'commander';
 import chalk from 'chalk';
@@ -6,13 +6,12 @@ import { createRequire } from 'module';
 
 const require = createRequire(import.meta.url);
 
-// Import commands directly from TypeScript source
-import { initCommand } from '../src/commands/init.ts';
-import { deployCommand } from '../src/commands/deploy.ts';
-import { pullCommand } from '../src/commands/pull.ts';
-import { testCommand } from '../src/commands/test.ts';
+// Import commands from relative paths
+import { initCommand } from '../commands/init.js';
+import { deployCommand } from '../commands/deploy.js';
+import { pullCommand } from '../commands/pull.js';
 
-const packageJson = require('../package.json');
+const packageJson = require('../../package.json');
 
 const program = new Command();
 
@@ -25,7 +24,6 @@ program
 program.addCommand(initCommand);
 program.addCommand(deployCommand);
 program.addCommand(pullCommand);
-// program.addCommand(testCommand);
 
 // Show help if no command provided
 if (process.argv.length <= 2) {

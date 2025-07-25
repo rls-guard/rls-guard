@@ -127,7 +127,7 @@ class DatabaseBuilder {
 }
 
 class ConfigBuilder {
-  private config: Config;
+  public config: Config;
 
   constructor() {
     this.config = { database: '', policies: [] } as Config;

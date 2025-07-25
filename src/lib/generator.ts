@@ -81,8 +81,7 @@ export class ConfigGenerator {
    * @returns {string} Import statements
    */
   generateImports(): string {
-    return `import { RLSConfig } from 'rls-guard';
-const { config, currentUserId, tenantId, publicAccess, noAccess, recentData, ownerOnly, roleCheck, timeWindow } = RLSConfig;`;
+    return `import { config, currentUserId, tenantId, publicAccess, noAccess, recentData, ownerOnly, roleCheck, timeWindow } from 'rls-guard';`;
   }
 
   /**
