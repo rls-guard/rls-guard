@@ -6,6 +6,7 @@ A powerful CLI tool for managing PostgreSQL Row Level Security (RLS) policies as
 
 - 🔒 **Declarative RLS policies** - Define your security policies in TypeScript using a fluent API
 - 🚀 **Easy deployment** - Deploy policies to your PostgreSQL database with a single command
+- 📥 **Policy extraction** - Pull existing RLS policies from your database and generate TypeScript configs
 - 🔍 **Dry-run support** - Preview SQL commands before executing them
 - 🎯 **Type-safe configuration** - Full TypeScript support with intellisense and type checking
 - 🏗️ **Built-in helpers** - Common RLS patterns like user isolation, tenant separation, and role-based access
@@ -13,7 +14,7 @@ A powerful CLI tool for managing PostgreSQL Row Level Security (RLS) policies as
 
 ## Installation
 
-Install globally via npm:
+Install via npm:
 
 ```bash
 npm install -g rls-guard
@@ -148,8 +149,6 @@ rls-guard pull --connection "postgresql://user:pass@localhost:5432/mydb"
 # Extract specific tables with comments
 rls-guard pull --tables "users,posts" --comments --output policies.config.ts
 
-# Generate JSON format
-rls-guard pull --format json --output policies.json
 ```
 
 ### `rls-guard deploy [options]`
@@ -159,34 +158,11 @@ Deploy RLS policies to your PostgreSQL database.
 - `--dry-run` - Show SQL commands without executing them
 - `--config, -c <path>` - Path to config file (default: `rls.config.ts`)
 
-### `rls-guard version`
-Show the current version.
-
 ## Requirements
 
-- Node.js 12+
+- Node.js 18+
 - PostgreSQL 9.5+ (RLS support)
 - TypeScript configuration file
-
-## Testing
-
-RLS Guard includes comprehensive test suites:
-
-```bash
-# Run unit and basic integration tests
-npm test
-
-# Run database integration tests (requires PostgreSQL)
-npm run test:db
-
-# Set up test database with Docker
-npm run test:db-setup
-
-# Run full test suite with Docker database  
-npm run test:full
-```
-
-See [TESTING.md](TESTING.md) for detailed testing documentation.
 
 ## Contributing
 

@@ -1,15 +1,17 @@
 {
   "name": "rls-guard",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A CLI tool for managing PostgreSQL Row Level Security (RLS) policies as code",
   "main": "dist/index.js",
   "type": "module",
   "bin": {
-    "rls-guard": "./bin/cli.js"
+    "rls-guard": "tsx ./bin/cli.ts"
   },
   "scripts": {
     "build": "tsc",
     "test": "tsx test/lib-only.test.ts test/integration.test.ts",
+    "test:local": "tsx ./bin/cli.ts test",
+    "test:db-local": "tsx ./bin/cli.ts test --with-database",
     "test:watch": "tsx --watch test/lib-only.test.ts test/integration.test.ts",
     "test:all": "tsx test/*.test.ts",
     "test:db": "tsx test/database-integration.test.ts",
@@ -20,7 +22,7 @@
   "keywords": [
     "cli",
     "postgresql",
-    "rls", 
+    "rls",
     "row-level-security",
     "database",
     "security",
@@ -35,7 +37,7 @@
   },
   "homepage": "https://github.com/rls-guard/rls-guard#readme",
   "engines": {
-    "node": ">=12.0.0"
+    "node": ">=18.0.0"
   },
   "os": [
     "darwin",
@@ -53,11 +55,11 @@
     "README.md"
   ],
   "dependencies": {
+    "@types/node": "^20.0.0",
+    "chalk": "^5.3.0",
     "commander": "^12.0.0",
     "pg": "^8.11.0",
-    "tsx": "^4.7.0",
-    "@types/node": "^20.0.0",
-    "chalk": "^5.3.0"
+    "tsx": "^4.20.3"
   },
   "devDependencies": {
     "@types/pg": "^8.11.0"

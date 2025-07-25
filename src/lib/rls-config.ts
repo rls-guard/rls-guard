@@ -187,7 +187,7 @@ const database = () => new DatabaseBuilder();
 const config = () => new ConfigBuilder();
 
 // Export everything
-export default {
+export {
   PolicyBuilder,
   DatabaseBuilder,
   ConfigBuilder,
