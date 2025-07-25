@@ -154,3 +154,5 @@ __debug_bin*
 
 # Go workspace file
 go.work
+
+rls.config.ts
